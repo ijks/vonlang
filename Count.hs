@@ -27,6 +27,7 @@ data Statement
 	| DeclareConstant Name Number
 	| Comment String
 	| Print [Name] OutputType
+	| Loop Name [Statement]
 	deriving (Eq, Show)
 
 ahahah :: Parser String
@@ -50,13 +51,21 @@ parseOutputType
 	= AsNumber <$ pToken "!"
 	<|> AsCharacter <$ ahahah
 
+parseEnd :: Parser String
+parseEnd = pToken "*thunder*"
+
+parseLoop :: Parser Statement
+parseLoop = Loop <$ pToken "I count " <*> parseName <* pToken ":\n" <*> parseBlock <* parseEnd
+
 parseStatement :: Parser Statement
-parseStatement = parsePrint <|> parseDeclConstant <|> parseAssignment
+parseStatement = parsePrint <|> parseLoop <|> parseDeclConstant <|> parseAssignment
+
+parseBlock :: Parser [Statement]
+parseBlock = pListSep (pToken "\n") parseStatement <* pToken "\n"
 
 parseProgram :: Parser [Statement]
 parseProgram = pToken "Ah hello there, it is I, the count.\n" *>
-	pListSep (pToken "\n") parseStatement <*
-	pMaybe (pToken "\n")
+	parseBlock
 
 type Execute m a = StateT (Map Name Register) m a
 
@@ -74,6 +83,9 @@ executeStmt (Print names AsCharacter) = do
 executeStmt (Print names AsNumber) = do
 	regs <- get
 	lift $ mapM_ (putStr . show . fromRegister . (regs Map.!)) names
+executeStmt (Loop counter instrs) = do
+	count <- gets (fromRegister . (Map.! counter))
+	replicateM_ count $ executeProgram instrs
 
 executeProgram :: [Statement] -> Execute IO ()
 executeProgram = mapM_ executeStmt
