@@ -13,9 +13,9 @@ Ah hello there, it is I, the Count!
 ```
 
 This is followed by zero or more statements, each on a separate line. The program
-then ends with the block-end marker `*thunder`.
+then ends with the block-end marker `*thunder*`.
 
-For example, this program that prints the number 42:
+For example, this program prints the number 42:
 
 ```
 Ah hello there, it is I, the Count!
@@ -108,6 +108,9 @@ I count loops:
 ```
 
 ## Not Yet Implemented
+
+The following language constructs are not implemented yet. In fact, the designs
+are not final at all.
 
 ### Increment
 
